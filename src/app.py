@@ -22,7 +22,7 @@ if not LOG_DIR.exists():
 
 DISPLAY_WIDTH = 320
 DISPLAY_HEIGHT = 240
-ROTATION = 0
+ROTATION = 180
 
 logging.basicConfig(
     level=logging.INFO,
@@ -87,13 +87,13 @@ class GlucoseApp:
         rate = delta_val / delta_minutes  # mmol/L per minute
 
         if rate >= 0.167:
-            return "↑↑"
-        elif rate >= 0.111:
             return "↑"
+        elif rate >= 0.111:
+            return "↗"
         elif rate <= -0.167:
-            return "↓↓"
-        elif rate <= -0.111:
             return "↓"
+        elif rate <= -0.111:
+            return "↘"
         else:
             return "→"
 
