@@ -68,7 +68,7 @@ class GlucoseApp:
         self.current_glucose = None
         self.trend_arrow = "→"
         self.updated_ts = None
-        self.button_a = Button(21)
+        self.button_a = Button(5)
         self.button_a.when_pressed = self.on_button_a
 
     @classmethod
