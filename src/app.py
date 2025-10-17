@@ -6,7 +6,6 @@ import time
 from pathlib import Path
 
 import st7789
-from gpiozero import Button
 from PIL import Image, ImageDraw, ImageFont
 
 from eversense_client import EversenseClient
@@ -68,8 +67,6 @@ class GlucoseApp:
         self.current_glucose = None
         self.trend_arrow = "→"
         self.updated_ts = None
-        self.button_a = Button(5, pull_up=True)
-        self.button_a.when_pressed = self.on_button_a
 
     @classmethod
     def calculate_trend_arrow(cls, data_points):
@@ -116,10 +113,6 @@ class GlucoseApp:
         disp.begin()
         return disp
 
-    @classmethod
-    def on_button_a(cls):
-        exit(0)
-
     def display_blood_sugar(self):
         if self.current_glucose is None:
             return
@@ -150,6 +143,7 @@ class GlucoseApp:
             draw.text((tx, ty), ts_text, font=self.FONT_SMALL, fill=(150, 150, 150))
 
         # Push to display
+        self.logger.debug(f"[GlucoseApp] Displaying blood sugar {self.current_glucose}")
         self.disp.display(image)
 
     def glucose_color(self) -> tuple:
@@ -182,11 +176,12 @@ class GlucoseApp:
                         dt = datetime.datetime.fromisoformat(ts)
                         readings.append((dt.isoformat(), float(val)))
                 except Exception as e:
-                    self.logger.error(f"[Parse] Error parsing event: {e}")
+                    self.logger.error(f"[GlucoseApp] Error parsing event: {e}")
             if readings:
                 self.db.add_readings(readings)
                 self.db.prune_old()
                 last_points = self.db.get_last_24h()
+                self.logger.debug(f"[GlucoseApp] Last 24h glucose # points: {len(last_points)}")
                 if last_points:
                     latest_ts, self.current_glucose = last_points[-1]
                     self.trend_arrow = self.calculate_trend_arrow(last_points)
@@ -199,12 +194,12 @@ class GlucoseApp:
                 # Login + get user id if missing
                 if not self.client.access_token or self.user_id is None:
                     if not self.client.login():
-                        self.logger.debug("[FetchLoop] Login failed, retrying in 60s")
+                        self.logger.debug("[GlucoseApp] Login failed, retrying in 60s")
                         time.sleep(60)
                         continue
                     self.user_id = self.client.fetch_user_id()
                     if self.user_id is None:
-                        self.logger.debug("[FetchLoop] Failed to get user ID, retrying in 60s")
+                        self.logger.debug("[GlucoseApp] Failed to get user ID, retrying in 60s")
                         time.sleep(60)
                         continue
                     self.client.user_id = self.user_id
@@ -212,7 +207,7 @@ class GlucoseApp:
                 self.load_events()
 
             except Exception as e:
-                self.logger.error(f"[FetchLoop] Error: {e}")
+                self.logger.error(f"[GlucoseApp] Error: {e}")
             # Sleep with jitter
             time.sleep(self.FETCH_INTERVAL_SEC + random.uniform(-30, 30))
 
