@@ -104,11 +104,10 @@ class GlucoseApp:
             height=DISPLAY_HEIGHT,
             rotation=ROTATION,
             port=0,
-            cs=0,
+            cs=1,
             dc=9,
             backlight=13,
             spi_speed_hz=80_000_000,
-            rst=19
         )
         disp.begin()
         return disp
