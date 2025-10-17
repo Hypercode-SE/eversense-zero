@@ -44,7 +44,7 @@ class GlucoseApp:
     FETCH_INTERVAL_SEC = 5 * 60
 
     try:
-        FONT_BIG = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 72)
+        FONT_BIG = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 96)
         FONT_MED = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 32)
         FONT_SMALL = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
     except Exception:
@@ -124,7 +124,7 @@ class GlucoseApp:
         # Center the glucose value
         w, h = draw.textbbox((0, 0), current_glucose, font=self.FONT_BIG)[2:]
         x = (DISPLAY_WIDTH - w) // 2
-        y = (DISPLAY_HEIGHT - h) // 2 - 20
+        y = (DISPLAY_HEIGHT - h) // 2 - 40
         draw.text((x, y), current_glucose, font=self.FONT_BIG, fill=self.glucose_color())
 
         # Trend arrow below the value
