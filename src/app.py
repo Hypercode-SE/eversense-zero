@@ -117,21 +117,27 @@ class GlucoseApp:
             return
 
         # Create a full-screen image
-        image = Image.new("RGB", (DISPLAY_WIDTH, DISPLAY_HEIGHT), (0, 0, 0))
+        bg_r, bg_g, bg_b = self.glucose_color()
+        image = Image.new("RGB", (DISPLAY_WIDTH, DISPLAY_HEIGHT), (bg_r, bg_g, bg_b))
         draw = ImageDraw.Draw(image)
+
+        # Pick readable text color against background
+        luminance = 0.299 * bg_r + 0.587 * bg_g + 0.114 * bg_b
+        text_color = (0, 0, 0) if luminance > 140 else (255, 255, 255)
+
         current_glucose = str(self.current_glucose)
 
         # Center the glucose value
         w, h = draw.textbbox((0, 0), current_glucose, font=self.FONT_BIG)[2:]
         x = (DISPLAY_WIDTH - w) // 2
         y = (DISPLAY_HEIGHT - h) // 2 - 40
-        draw.text((x, y), current_glucose, font=self.FONT_BIG, fill=self.glucose_color())
+        draw.text((x, y), current_glucose, font=self.FONT_BIG, fill=text_color)
 
         # Trend arrow below the value
         aw, ah = draw.textbbox((0, 0), self.trend_arrow, font=self.FONT_MED)[2:]
         ax = (DISPLAY_WIDTH - aw) // 2
         ay = y + h + 10
-        draw.text((ax, ay), self.trend_arrow, font=self.FONT_MED, fill=(200, 200, 200))
+        draw.text((ax, ay), self.trend_arrow, font=self.FONT_MED, fill=text_color)
 
         # Timestamp at bottom
         if self.updated_ts:
@@ -139,7 +145,7 @@ class GlucoseApp:
             tw, th = draw.textbbox((0, 0), ts_text, font=self.FONT_SMALL)[2:]
             tx = (DISPLAY_WIDTH - tw) // 2
             ty = DISPLAY_HEIGHT - th - 8
-            draw.text((tx, ty), ts_text, font=self.FONT_SMALL, fill=(150, 150, 150))
+            draw.text((tx, ty), ts_text, font=self.FONT_SMALL, fill=text_color)
 
         # Push to display
         self.logger.debug(f"[GlucoseApp] Displaying blood sugar {self.current_glucose}")
